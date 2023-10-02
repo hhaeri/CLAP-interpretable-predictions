@@ -35,7 +35,7 @@ class RandomChestXRay(VisionDataset):
         transforms: Optional[Callable] = None,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        num_random_lines = 2,
+        num_random_xrays = 2,
     ) -> None:
         super().__init__(str(ROOT_DIR), transforms, transform, target_transform)
         self.train = train
@@ -49,7 +49,7 @@ class RandomChestXRay(VisionDataset):
             else ROOT_DIR / "test_list.txt"
         )
         with open(idx_file, "r") as file:
-            images = set(map(lambda s: s.strip("\n"), random.sample(file.readlines(), num_random_lines)))
+            images = set(map(lambda s: s.strip("\n"), random.sample(file.readlines(), num_random_xrays)))
         info_df = pd.read_csv(
             ROOT_DIR / "Data_Entry_2017_v2020.csv", index_col="Image Index"
         )
@@ -81,9 +81,10 @@ class RandomChestXRay(VisionDataset):
 
         img_file = self.filename[index]
         x = PIL.Image.open(ROOT_DIR / "images" / "images" / img_file)
-
-        if self.transform is not None:
-            x = self.transform(x)
+        
+##HH chnaged transform to transforms here
+        if self.transforms is not None:
+            x = self.transforms(x)
 
         if self.target_transform is not None:
             y = self.target_transform(y)
