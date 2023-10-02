@@ -1,6 +1,15 @@
 import torch
 from pathlib import Path
 from ...CLAP-Git.CLAP-interpretable-predictions-main.src.architecture.clap import CLAP
+from ...CLAP-Git.CLAP-interpretable-predictions-main.src.data.loading import get_datasets
+from typing import Any, Callable, List, Optional, Union
+
+import PIL
+import numpy as np
+import pandas as pd
+from torchvision.datasets import VisionDataset
+
+
 
 RESULTS_DIR = Path("../CLAP-Git/resolution64")
 
@@ -95,8 +104,11 @@ class RandomChestXRay(VisionDataset):
 ###### Load the Model
 
 # Create an instance of the VAE model
-
-Clap = CLAP()
+train_dataset, test_dataset, n_channels, image_dim, n_classes = get_datasets(
+        ChestXRay')
+z_style_dim = 20 
+z_core_dim = 10
+Clap = CLAP(n_channels, image_dim, z_style_dim, z_core_dim, n_classes)
 
 
 # Load the model weights from the checkpoint file
