@@ -1,7 +1,8 @@
 import torch
 from pathlib import Path
+from torchvision.transforms import Compose, Grayscale, Normalize, Resize, ToTensor
 from ...CLAP-Git.CLAP-interpretable-predictions-main.src.architecture.clap import CLAP
-from ...CLAP-Git.CLAP-interpretable-predictions-main.src.data.loading import get_datasets
+from ...CLAP-Git.CLAP-interpretable-predictions-main.src.data.loading import get_datasets, resize_transform
 from typing import Any, Callable, List, Optional, Union
 
 import PIL
@@ -16,6 +17,7 @@ RESULTS_DIR = Path("../CLAP-Git/resolution64")
 #from .chestxray import ROOT_DIR
 ROOT_DIR = Path("../ NIHCC_CRX_Full_Res / CXR8")
 
+dataset_name = "ChestXRay"
 ###### Load the Data
 
 LABELS = {
@@ -101,13 +103,28 @@ class RandomChestXRay(VisionDataset):
         return x, y
 
 
+
+random_dataset = RandomChestXRay(
+    train=False,
+    transforms=Compose(
+            [
+                # some images have 1 channel, others 4. Make them all 1 channel.
+                Grayscale(num_output_channels=1),
+                resize_transform(dataset_name, 64),
+            ]
+        ),
+)
+# Grabbed the dataset statistics from loading.py
+setattr(random_dataset, "mean", [0.0])
+setattr(random_dataset, "std", [1.0])
+
 ###### Load the Model
 
 # Create an instance of the VAE model
-train_dataset, test_dataset, n_channels, image_dim, n_classes = get_datasets(
-        ChestXRay')
-z_style_dim = 20 
-z_core_dim = 10
+
+n_channels, image_dim, n_classes = 1, 64, 15
+z_style_dim, z_core_dim = 20, 10 
+
 Clap = CLAP(n_channels, image_dim, z_style_dim, z_core_dim, n_classes)
 
 
@@ -119,4 +136,10 @@ vae.load_state_dict(checkpoint['state_dict'])
 
 ###### Encode Data
 
+# Expand dimensions if needed (e.g., for a single image)
+if len(random_dataset.shape) == 2:
+    random_dataset = random_dataset.unsqueeze(0)
+
+# Pass the input through the encoder to obtain latent representations
+latent_representation, _, _ = CLAP.encode(input_tensor)
 
