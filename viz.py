@@ -125,14 +125,14 @@ setattr(random_dataset, "std", [1.0])
 n_channels, image_dim, n_classes = 1, 64, 15
 z_style_dim, z_core_dim = 20, 10 
 
-Clap = CLAP(n_channels, image_dim, z_style_dim, z_core_dim, n_classes)
+Clap_model = CLAP(n_channels, image_dim, z_style_dim, z_core_dim, n_classes)
 
 
 # Load the model weights from the checkpoint file
 
 checkpoint_path = RESULTS_DIR/"model_best.pth.tar.gz" 
 checkpoint = torch.load(checkpoint_path)
-vae.load_state_dict(checkpoint['state_dict'])
+Clap_model.load_state_dict(checkpoint['state_dict'])
 
 ###### Encode Data
 
@@ -141,5 +141,7 @@ if len(random_dataset.shape) == 2:
     random_dataset = random_dataset.unsqueeze(0)
 
 # Pass the input through the encoder to obtain latent representations
-latent_representation, _, _ = CLAP.encode(input_tensor)
+
+mean_core, log_var_core, z_core, mean_style, log_var_style, z_style, x_reconstructed, y_pred = Clap_model.pred_vae()
+
 
