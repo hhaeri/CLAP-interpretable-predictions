@@ -150,6 +150,7 @@ for i in range z_core_dim:
         z_core[i,:] = Normal(loc=mean_core[i], scale=j*(torch.exp(0.5 * log_var_core[i]))).rsample()
 
         z = torch.cat([z_core, z_style], dim=-1)
+        #the following line needs correction to concatanate the constructed images instead of overwriting
         reconstructed_images = Clap_model.decoder(z)
 
-
+#have to do same for the z-style
