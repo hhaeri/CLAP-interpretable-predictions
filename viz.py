@@ -46,7 +46,7 @@ class RandomChestXRay(VisionDataset):
         transforms: Optional[Callable] = None,
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
-        num_random_xrays = 2,
+        num_random_xrays = 1,
     ) -> None:
         super().__init__(str(ROOT_DIR), transforms, transform, target_transform)
         self.train = train
