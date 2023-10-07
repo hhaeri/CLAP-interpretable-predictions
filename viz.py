@@ -145,12 +145,31 @@ if len(random_dataset.shape) == 2:
 mean_core, log_var_core, z_core, mean_style, log_var_style, z_style, x_reconstructed, y_pred = Clap_model.pred_vae(random_dataset)
 
 # Traverse the Latent Space. Pass the latent space to the decoder to obtain the reconstructed images
-for i in range z_core_dim:
+#z_core:
+for dc in range (z_core_dim):
     for j in range (-3,4):
-        z_core[i,:] = Normal(loc=mean_core[i], scale=j*(torch.exp(0.5 * log_var_core[i]))).rsample()
+        temp = z_core[dc]
+        z_core[dc] = Normal(loc=mean_core[dc], scale=j*(torch.exp(0.5 * log_var_core[dc]))).rsample()
 
         z = torch.cat([z_core, z_style], dim=-1)
         #the following line needs correction to concatanate the constructed images instead of overwriting
         reconstructed_images = Clap_model.decoder(z)
+        
+        # Concatenate all the reconstructed images along the new dimension (dim=0)
+        all_reconstructed_images = torch.cat(all_reconstructed_images, dim=0)
+        z_core[dc,:] = temp
+#z_style:
+for ds in range (z_style_dim):
+    for j in range (-3,4):
+        temp = z_style[ds]
+        z_style[ds] = Normal(loc=mean_style[ds], scale=j*(torch.exp(0.5 * log_var_style[ds]))).rsample()
 
-#have to do same for the z-style
+        z = torch.cat([z_core, z_style], dim=-1)
+        #the following line needs correction to concatanate the constructed images instead of overwriting
+        reconstructed_images = Clap_model.decoder(z)
+        
+        # Concatenate all the reconstructed images along the new dimension (dim=0)
+        all_reconstructed_images = torch.cat(all_reconstructed_images, dim=0)
+        z_style[ds] = temp
+    
+
