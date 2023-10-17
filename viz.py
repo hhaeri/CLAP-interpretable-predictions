@@ -149,7 +149,7 @@ mean_core, log_var_core, z_core, mean_style, log_var_style, z_style, x_reconstru
 for dc in range (z_core_dim):
     for j in range (-3,4):
         temp = z_core[dc]
-        z_core[dc] = Normal(loc=mean_core[dc], scale=j*(torch.exp(0.5 * log_var_core[dc]))).rsample()
+        z_core[dc] +=j*torch.exp(log_var_core[dc])
 
         z = torch.cat([z_core, z_style], dim=-1)
         #the following line needs correction to concatanate the constructed images instead of overwriting
@@ -162,8 +162,8 @@ for dc in range (z_core_dim):
 for ds in range (z_style_dim):
     for j in range (-3,4):
         temp = z_style[ds]
-        z_style[ds] = Normal(loc=mean_style[ds], scale=j*(torch.exp(0.5 * log_var_style[ds]))).rsample()
-
+        z_style[ds] +=j*torch.exp(log_var_style[dc])
+        
         z = torch.cat([z_core, z_style], dim=-1)
         #the following line needs correction to concatanate the constructed images instead of overwriting
         reconstructed_images = Clap_model.decoder(z)
